@@ -30,10 +30,12 @@ pipeline{
           steps{
             script{
                 withCredentials([string(credentialsId: 'docker_pass', variable: 'docker_password')]) {
-                        sh '''docker build -t 3.110.104.86:8083/springapp:${VERSION} . 
-                            docker login -u admin -p $docker_password 3.110.104.86:8083
-                           docker push 3.110.104.86:8083/springapp:${VERSION}
-                           docker rmi 3.110.104.86:8083/springapp:${VERSION}'''
+                        sh '''
+                        docker build -t 3.110.104.86:8083/springapp:${VERSION} . 
+                        docker login -u admin -p $docker_password 3.110.104.86:8083
+                        docker push 3.110.104.86:8083/springapp:${VERSION}
+                        docker rmi 3.110.104.86:8083/springapp:${VERSION}
+                        '''
                 }
             }
           }
@@ -66,7 +68,7 @@ pipeline{
           }
         }  
 
-        stage('manual approval'){
+        stage('Manual approval'){
             steps{
                 script{
                     timeout(10) {
@@ -82,7 +84,10 @@ pipeline{
                script{
                    withCredentials([kubeconfigContent(credentialsId: 'kubernetes-config', variable: 'KUBECONFIG_CONTENT')]) {
                         dir('kubernetes/') {
-                          sh '''helm upgrade --install --set image.repository="3.110.104.86:8083/springapp" --set image.tag="${VERSION}" myjavaapp myapp/'''
+                          sh '''
+                          docker login -u admin -p $docker_password 3.110.104.86:8083
+                          helm upgrade --install --set image.repository="3.110.104.86:8083/springapp" --set image.tag="${VERSION}" myjavaapp myapp/
+                          '''
                         }
                     }
                }
