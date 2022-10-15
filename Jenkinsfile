@@ -85,7 +85,7 @@ pipeline{
                    withCredentials([kubeconfigContent(credentialsId: 'kubernetes-config', variable: 'KUBECONFIG_CONTENT')]) {
                         dir('kubernetes/') {
                           sh '''
-                          docker login -u admin -p $docker_password 3.110.104.86:8083
+                          docker login -u admin -p admin 3.110.104.86:8083
                           helm upgrade --install --set image.repository="3.110.104.86:8083/springapp" --set image.tag="${VERSION}" myjavaapp myapp/
                           '''
                         }
