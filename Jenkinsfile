@@ -85,7 +85,6 @@ pipeline{
                    withCredentials([kubeconfigContent(credentialsId: 'kubernetes-config', variable: 'KUBECONFIG_CONTENT')]) {
                         dir('kubernetes/') {
                           sh '''
-                          docker login -u admin -p admin 3.110.104.86:8083
                           helm upgrade --install --set image.repository="3.110.104.86:8083/springapp" --set image.tag="${VERSION}" myjavaapp myapp/
                           '''
                         }
@@ -93,6 +92,18 @@ pipeline{
                }
             }
         }
+
+        stage('verifying app deployment'){
+            steps{
+                script{
+                     withCredentials([kubeconfigFile(credentialsId: 'kubernetes-config', variable: 'KUBECONFIG_CONTENT')]) {
+                         sh 'kubectl run curl --image=curlimages/curl -i --rm --restart=Never -- curl myjavaapp-myapp:8080'
+
+                     }
+                }
+            }
+        }
+
     }
     post {
 		always {
@@ -100,3 +111,5 @@ pipeline{
 		 }
 	   }
 }
+
+
